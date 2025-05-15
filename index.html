@@ -31,15 +31,7 @@
   </div>
 
   <script>
-    const billetsSimules = [
-      { destination: "Lyon", prix: 35 },
-      { destination: "Marseille", prix: 65 },
-      { destination: "Lille", prix: 25 },
-      { destination: "Bordeaux", prix: 45 },
-      { destination: "Strasbourg", prix: 55 },
-    ];
-
-    function chercherBillets() {
+    async function chercherBillets() {
       const ville = document.getElementById("ville").value.trim();
       const budget = parseFloat(document.getElementById("budget").value);
       const resultatsDiv = document.getElementById("resultats");
@@ -50,17 +42,33 @@
         return;
       }
 
-      const filtres = billetsSimules.filter(b => b.prix <= budget);
+      resultatsDiv.innerHTML = "<p class='text-gray-600'>Recherche en cours...</p>";
 
-      if (filtres.length === 0) {
-        resultatsDiv.innerHTML = "<p class='text-gray-600'>Aucun billet trouvé dans ton budget.</p>";
-      } else {
-        filtres.forEach(billet => {
+      try {
+        const url = `https://api.kombo.co/search/?from=${encodeURIComponent(ville)}&max_price=${budget}&adults=1`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        resultatsDiv.innerHTML = "";
+
+        if (!data.trips || data.trips.length === 0) {
+          resultatsDiv.innerHTML = "<p class='text-gray-600'>Aucun billet trouvé dans ton budget.</p>";
+          return;
+        }
+
+        data.trips.forEach(trip => {
           const div = document.createElement("div");
           div.className = "p-4 border rounded bg-gray-50";
-          div.innerHTML = `<strong>${ville} → ${billet.destination}</strong><br>Prix : ${billet.prix}€`;
+          div.innerHTML = `
+            <strong>${trip.legs[0].departure.city_name} → ${trip.legs[0].arrival.city_name}</strong><br>
+            Prix : ${trip.price.amount} €<br>
+            Départ : ${new Date(trip.legs[0].departure.datetime).toLocaleString()}
+          `;
           resultatsDiv.appendChild(div);
         });
+      } catch (err) {
+        console.error(err);
+        resultatsDiv.innerHTML = "<p class='text-red-600'>Erreur lors de la récupération des billets.</p>";
       }
     }
   </script>
