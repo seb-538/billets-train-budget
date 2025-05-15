@@ -45,8 +45,10 @@
       resultatsDiv.innerHTML = "<p class='text-gray-600'>Recherche en cours...</p>";
 
       try {
-        const url = `https://api.kombo.co/search/?from=${encodeURIComponent(ville)}&max_price=${budget}&adults=1`;
-        const response = await fetch(url);
+        const baseURL = `https://api.kombo.co/search/?from=${encodeURIComponent(ville)}&max_price=${budget}&adults=1`;
+        const proxyURL = "https://corsproxy.io/?" + encodeURIComponent(baseURL);
+
+        const response = await fetch(proxyURL);
         const data = await response.json();
 
         resultatsDiv.innerHTML = "";
@@ -57,17 +59,18 @@
         }
 
         data.trips.forEach(trip => {
+          const leg = trip.legs[0];
           const div = document.createElement("div");
           div.className = "p-4 border rounded bg-gray-50";
           div.innerHTML = `
-            <strong>${trip.legs[0].departure.city_name} → ${trip.legs[0].arrival.city_name}</strong><br>
+            <strong>${leg.departure.city_name} → ${leg.arrival.city_name}</strong><br>
             Prix : ${trip.price.amount} €<br>
-            Départ : ${new Date(trip.legs[0].departure.datetime).toLocaleString()}
+            Départ : ${new Date(leg.departure.datetime).toLocaleString()}
           `;
           resultatsDiv.appendChild(div);
         });
       } catch (err) {
-        console.error(err);
+        console.error("Erreur API:", err);
         resultatsDiv.innerHTML = "<p class='text-red-600'>Erreur lors de la récupération des billets.</p>";
       }
     }
