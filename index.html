@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recherche de billets</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+  <div class="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6 space-y-4">
+    <h1 class="text-2xl font-bold text-center">Trouve ton billet de train</h1>
+
+    <div class="space-y-2">
+      <label class="block font-semibold">Ville de départ</label>
+      <input id="ville" type="text" placeholder="ex: Paris"
+        class="w-full border rounded p-2" />
+    </div>
+
+    <div class="space-y-2">
+      <label class="block font-semibold">Budget maximum (€)</label>
+      <input id="budget" type="number" placeholder="ex: 50"
+        class="w-full border rounded p-2" />
+    </div>
+
+    <button onclick="chercherBillets()"
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      Rechercher
+    </button>
+
+    <div id="resultats" class="space-y-4 mt-4"></div>
+  </div>
+
+  <script>
+    const billetsSimules = [
+      { destination: "Lyon", prix: 35 },
+      { destination: "Marseille", prix: 65 },
+      { destination: "Lille", prix: 25 },
+      { destination: "Bordeaux", prix: 45 },
+      { destination: "Strasbourg", prix: 55 },
+    ];
+
+    function chercherBillets() {
+      const ville = document.getElementById("ville").value.trim();
+      const budget = parseFloat(document.getElementById("budget").value);
+      const resultatsDiv = document.getElementById("resultats");
+      resultatsDiv.innerHTML = "";
+
+      if (!ville || isNaN(budget)) {
+        resultatsDiv.innerHTML = "<p class='text-red-600'>Remplis tous les champs correctement.</p>";
+        return;
+      }
+
+      const filtres = billetsSimules.filter(b => b.prix <= budget);
+
+      if (filtres.length === 0) {
+        resultatsDiv.innerHTML = "<p class='text-gray-600'>Aucun billet trouvé dans ton budget.</p>";
+      } else {
+        filtres.forEach(billet => {
+          const div = document.createElement("div");
+          div.className = "p-4 border rounded bg-gray-50";
+          div.innerHTML = `<strong>${ville} → ${billet.destination}</strong><br>Prix : ${billet.prix}€`;
+          resultatsDiv.appendChild(div);
+        });
+      }
+    }
+  </script>
+</body>
+</html>
